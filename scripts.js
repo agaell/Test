@@ -1,64 +1,50 @@
-document.addEventListener('DOMContentLoaded', () => {
-    if (navigator.xr) {
-        navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-            if (supported) {
-                initAR();
-                alert('AR supported on this device.');
-            } else {
-                alert('AR not supported on this device.');
-            }
-        });
-    } else {
-        alert('WebXR not supported in this browser.');
-    }
-});
+let camera, scene, renderer, controls;
 
-function initAR() {
+init();
+animate();
+
+function init() {
     const container = document.getElementById('container');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+    // Создание камеры
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.set(0, 0, 0.1);
+
+    // Создание сцены
+    scene = new THREE.Scene();
+
+    // Загрузка панорамного изображения
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('https://threejs.org/examples/textures/panorama.jpg', () => {
+        const geometry = new THREE.SphereGeometry(500, 60, 40);
+        geometry.scale(-1, 1, 1);
+
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+    });
+
+    // Рендерер
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.xr.enabled = true;
     container.appendChild(renderer.domElement);
 
-    const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-    light.position.set(0.5, 1, 0.25);
-    scene.add(light);
+    // Управление через датчики устройства
+    controls = new THREE.DeviceOrientationControls(camera);
 
-    const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x0077ff });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, -0.5);
-    scene.add(cube);
+    // Обработка изменения размера окна
+    window.addEventListener('resize', onWindowResize, false);
+}
 
-    function animate() {
-        renderer.setAnimationLoop(render);
-    }
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
-    function render() {
-        renderer.render(scene, camera);
-    }
-
-    const button = document.createElement('button');
-    button.style.display = 'block';
-    button.style.margin = 'auto';
-    button.textContent = 'Enter AR';
-    document.body.appendChild(button);
-
-    button.addEventListener('click', () => {
-        button.style.display = 'none';
-        navigator.xr.requestSession('immersive-ar').then(onSessionStarted);
-    });
-
-    function onSessionStarted(session) {
-        renderer.xr.setSession(session);
-        animate();
-    }
-
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update(); // Обновление контролов
+    renderer.render(scene, camera); // Отрисовка сцены
 }
