@@ -15,7 +15,7 @@ function init() {
 
     // Загрузка панорамного изображения
     const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load('https://threejs.org/examples/textures/panorama.jpg', () => {
+    const texture = textureLoader.load('https://live.staticflickr.com/3289/2294472375_1e4766bc20_c_d.jpg', () => {
         const geometry = new THREE.SphereGeometry(500, 60, 40);
         geometry.scale(-1, 1, 1);
 
