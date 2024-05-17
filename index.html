@@ -1,12 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Web Page</title>
-</head>
-<body>
-    <h1>Welcome to my Web Page!</h1>
-    <p>This is a simple HTML page.</p>
-</body>
-</html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ARCore Geospatial Mesh</title>
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+            }
+            canvas {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.125/build/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/1.7.11/aframe/build/aframe-ar.min.js"></script>
+        <script>
+            // Three.js and AR.js setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.Camera();
+            scene.add(camera);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Adding lighting
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(1, 1, 1).normalize();
+            scene.add(light);
+
+            // Adding a simple cube
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            // AR.js marker setup
+            const arToolkitSource = new THREEx.ArToolkitSource({
+                sourceType: 'webcam'
+            });
+
+            arToolkitSource.init(() => {
+                setTimeout(() => {
+                    onResize();
+                }, 2000);
+            });
+
+            window.addEventListener('resize', () => {
+                onResize();
+            });
+
+            function onResize() {
+                arToolkitSource.onResize();
+                arToolkitSource.copySizeTo(renderer.domElement);
+                if (arToolkitContext.arController !== null) {
+                    arToolkitSource.copySizeTo(arToolkitContext.arController.canvas);
+                }
+            }
+
+            const arToolkitContext = new THREEx.ArToolkitContext({
+                cameraParametersUrl: 'https://artoolkit.org/patterns/camera_para.dat',
+                detectionMode: 'mono'
+            });
+
+            arToolkitContext.init(() => {
+                camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+            });
+
+            const markerRoot = new THREE.Group();
+            scene.add(markerRoot);
+
+            const arMarkerControls = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+                type: 'pattern',
+                patternUrl: 'https://raw.githubusercontent.com/artoolkit/artoolkit5/master/doc/patterns/patt.hiro'
+            });
+
+            // Render loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                if (arToolkitSource.ready !== true) return;
+
+                arToolkitContext.update(arToolkitSource.domElement);
+                markerRoot.visible = camera.visible;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        </script>
+    </body>
+    </html>
