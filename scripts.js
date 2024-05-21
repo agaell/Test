@@ -1,50 +1,32 @@
-let camera, scene, renderer, controls;
+import * as THREE from 'three';
 
-init();
-animate();
+const width = window.innerWidth, height = window.innerHeight;
 
-function init() {
-    const container = document.getElementById('container');
+// init
 
-    // Создание камеры
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.set(0, 0, 0.1);
+const camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 10 );
+camera.position.z = 1;
 
-    // Создание сцены
-    scene = new THREE.Scene();
+const scene = new THREE.Scene();
 
-    // Загрузка панорамного изображения
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load('https://live.staticflickr.com/3289/2294472375_1e4766bc20_c_d.jpg', () => {
-        const geometry = new THREE.SphereGeometry(500, 60, 40);
-        geometry.scale(-1, 1, 1);
+const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+const material = new THREE.MeshNormalMaterial();
 
-        const material = new THREE.MeshBasicMaterial({ map: texture });
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-    });
+const mesh = new THREE.Mesh( geometry, material );
+scene.add( mesh );
 
-    // Рендерер
-    renderer = new THREE.WebGLRenderer();
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
+const renderer = new THREE.WebGLRenderer( { antialias: true } );
+renderer.setSize( width, height );
+renderer.setAnimationLoop( animation );
+document.body.appendChild( renderer.domElement );
 
-    // Управление через датчики устройства
-    controls = new THREE.DeviceOrientationControls(camera);
+// animation
 
-    // Обработка изменения размера окна
-    window.addEventListener('resize', onWindowResize, false);
-}
+function animation( time ) {
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
+	mesh.rotation.x = time / 2000;
+	mesh.rotation.y = time / 1000;
 
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update(); // Обновление контролов
-    renderer.render(scene, camera); // Отрисовка сцены
+	renderer.render( scene, camera );
+
 }

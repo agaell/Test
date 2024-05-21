@@ -8,9 +8,14 @@
 </head>
 <body>
     <h1>Panorama Viewer</h1>
-    <div id="container"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://threejs.org/examples/js/controls/DeviceOrientationControls.js"></script>
+
+    <script type="importmap">
+	{
+		"imports": {
+			"three": "https://unpkg.com/three/build/three.module.js"
+		}
+	}
+</script>
     <script src="scripts.js"></script>
 </body>
 </html>
