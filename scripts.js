@@ -33,7 +33,7 @@ function init() {
     container.appendChild(renderer.domElement);
 
     // Управление через датчики устройства
-    controls = new THREE.DeviceOrientationControls(camera);
+    const controls = new OrbitControls( camera, renderer.domElement );
 
     // Обработка изменения размера окна
     window.addEventListener('resize', onWindowResize, false);
