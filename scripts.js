@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+alert("Привет из скрипта!");
 
 const width = window.innerWidth, height = window.innerHeight;
 
